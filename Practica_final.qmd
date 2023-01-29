@@ -1,0 +1,143 @@
+---
+title : " practica_final "
+formato : html
+redactor : visuales
+---
+
+Vamos a utilizar el conjunto de datos de semillas que se encuentra aquí: https://archive.ics.uci.edu/ml/datasets/seeds#
+
+Primero vamos a descargar el dataset con el siguiente comando:
+
+```{r}
+library(tidyverse)
+df_seeds  <- read.table( "https://archive.ics.uci.edu/ml/machine-learning-databases/00236/seeds_dataset.txt",
+col.names  = c( 'area' , 'perimetro' , 'compacto' , 'longitud' , 'ancho' , 'coeficiente.asimetria' , 'longitud.ranura' , 'tipo' ))
+```
+
+#### PREGUNTAS 1
+
+¿Cuantas filas y cuantas columnas tiene el dataframe df_seeds?
+
+**Respuesta** :
+
+```{r}
+paste("Tenemos",length(colnames(df_seeds)),"columnas y",length(rownames(df_seeds)), "filas" )
+```
+
+#### PREGUNTAS 2
+
+Vamos a convertir en factor la columna tipo. Vamos a reemplazar los números por su correspondiente etiqueta (label). La correspondencia entre el código y el tipo es:
+
+-   1 - Kamá
+-   2 - Rosa
+-   3 - canadiense
+
+**Respuesta** :
+
+```{r}
+df_seeds$tipo <- as.factor(df_seeds$tipo)
+summary(df_seeds)
+```
+
+#### PREGUNTAS 3
+
+¿Cual es la media del area de cada uno de los tipos?
+
+**Respuesta**
+
+```{r}
+library(tidyverse)
+df_seeds |> group_by(tipo) |> summarize(peso_medio=mean(area))
+```
+
+#### PREGUNTAS 4
+
+¿Cómo se llama el siguiente tipo de gráfico?. ¿Qué representa la línea del centro de la caja?
+
+```{r}
+library(ggplot2)
+ggplot( df_seeds , aes( x = tipo , y = area )) + geom_boxplot()
+
+```
+
+**Respuesta** : El grafico se llama Boxplot. La linea del centro representa la mediana
+
+#### PREGUNTAS 5
+
+¿Cómo pintarías un diagrama de puntos (o scatterplot) con ggplot con las siguientes características? - En el eje X la variable compacto - En el eje Y la variable area - Cada tipo de semilla tener debería un color diferente
+
+**Respuesta** :
+
+```{r}
+library(ggplot2)
+ggplot(df_seeds) + 
+  geom_point(aes(x = compacto, y = area, color = tipo))
+```
+
+#### PREGUNTAS 6
+
+¿Qué hace la siguiente linea?:
+
+```{r}
+df_seeds |> mutate(is_kama = tipo=='Kama') -> df_seeds
+```
+
+**Respuesta** : ''
+Agrega la nueva columna is_kama con valor FALSE al dataset 'df_seeds'
+
+#### PREGUNTAS 7
+
+Vamos a dividir el conjunto de datos en test y training porque vamos a entrenar un modelo que me permita diferenciar si una semilla es de tipo Kama o no. ¿Por qué es aconsejable dividir el conjunto de datos en los grupos de entrenamiento y prueba?
+
+```{r}
+set.seed( 123 ) # Este set.seed hace que a todos nos generen los mismos números aleatorios
+idx  <- muestra( 1 : nrow( df_seeds ), 0.7 * nrow( df_seeds ))
+df_seeds_train  <-  df_seeds [ idx ,]
+df_seeds_test  <-  df_seeds [ - idx ,]
+```
+
+**Respuesta** : 'Los datos de prueba, validación o «testing data« son los datos que nos “reservamos” para comprobar si el modelo que hemos generado a partir de los datos de entrenamiento “funciona.'
+
+#### PREGUNTAS 8
+
+Vamos a crear un modelo para realizar una clasificación binaria, donde le pasaremos como entrada las columnas: area, perimetro, compacto, longitud, coeficient.asimetria y longitud.ranura
+
+¿Qué tipo de algoritmo o modelo debería usar?
+
+**Respuesta** : 'modelo lineal'
+
+#### PREGUNTAS 9
+
+Crea un modelo que me permita clasificar si una semilla es de tipo Kama o no con las siguientes columnas: area, perimetro, compacto, longitud, coeficient.asimetria, longitud.ranura
+
+**Respuesta** :
+
+```{r}
+model <- glm(df_training, formula=sexo~altura+peso, family=binomial())
+cf <- caret::confusionMatrix(data=factor(predict(model,df_testing)>0, labels=c('ISKAMA','NOKAMA') ), reference=df_testing$is_kama )
+
+```
+
+#### PREGUNTAS 10
+
+Si usamos un umbral de 0 en la salida del modelo (lo que equivale a una probabilidad de 0.5 cuando usamos el predict con type='response') ¿Cuales son los valores de precisión y exhausitividad?
+
+**Respuesta** .
+
+```{r}
+paste('La precision es: ',M[2,2]/(M[1,2]+M[2,2])
+paste('La exhausitividad es: ',M[2,2]/(M[2,1]+M[2,2])
+```
+
+#### PREGUNTAS 11
+
+¿Qué están haciendo las siguientes líneas?
+
+```{r}
+set.seed(123)
+cl<-df_seeds |> select(area,perimetro,compacto,longitud,ancho,coeficiente.asimetria,longitud.ranura) |> kmeans(3)
+table(real=df_seeds$tipo,cluster=cl$cluster)
+
+```
+
+**Respuesta** : 'Calcula media en horizontal y vertical de los 3 grupos(centroides) de campo tipo y nos  deveulve los elementos que hay en cada centroide y los devuelve en una matriz de confusion'
