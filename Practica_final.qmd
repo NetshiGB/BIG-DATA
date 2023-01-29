@@ -35,8 +35,7 @@ Vamos a convertir en factor la columna tipo. Vamos a reemplazar los números por
 **Respuesta** :
 
 ```{r}
-df_seeds$tipo <- as.factor(df_seeds$tipo)
-summary(df_seeds)
+df_seeds$tipo <- factor(df_seeds$tipo,levels=c("Kama", "Rosa", "Canadian"))
 ```
 
 #### PREGUNTAS 3
@@ -104,7 +103,7 @@ Vamos a crear un modelo para realizar una clasificación binaria, donde le pasar
 
 ¿Qué tipo de algoritmo o modelo debería usar?
 
-**Respuesta** : 'modelo lineal'
+**Respuesta** : 'Un modelo de regresion lineal'
 
 #### PREGUNTAS 9
 
@@ -113,9 +112,7 @@ Crea un modelo que me permita clasificar si una semilla es de tipo Kama o no con
 **Respuesta** :
 
 ```{r}
-model <- glm(df_training, formula=sexo~altura+peso, family=binomial())
-cf <- caret::confusionMatrix(data=factor(predict(model,df_testing)>0, labels=c('ISKAMA','NOKAMA') ), reference=df_testing$is_kama )
-
+model <- glm(df_seeds_train, formula=is_kama~area+perimetro+compacto+longitud+coeficient.asimetria+longitud.ranura, family='binomial')
 ```
 
 #### PREGUNTAS 10
